@@ -1,7 +1,8 @@
 .venv
 venv
-
 .env
 
 pdf_downloads
 pdf_downloads/*
+
+*.html

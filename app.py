@@ -1,65 +1,23 @@
 import urllib.parse
 
 import requests
-from dotenv import load_dotenv
-import os
-
-from requests import session
-import requests
 from bs4 import BeautifulSoup
+
+from webdriver_manager.chrome import ChromeDriverManager
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 
-load_dotenv()
-username = os.getenv("LMS_USER_NAME")
-password = os.getenv("LMS_PASSWORD")
-
-# Create a folder to store PDFs
-DOWNLOAD_FOLDER = "pdf_downloads"
-os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
+import yt_dlp
+import time
+import os
 
 
-def login2_to_lms():
-    # Define URLs
-    LOGIN_PAGE = "https://lms.itcareerhub.de/login/index.php"
-    LOGIN_POST = "https://lms.itcareerhub.de/login/index.php"
 
-    # Start a session
-    session = requests.Session()
 
-    # Get login page to fetch CSRF token
-    resp = session.get(LOGIN_PAGE)
-    soup = BeautifulSoup(resp.text, 'html.parser')
 
-    # Extract the token
-    token_input = soup.find("input", {"name": "logintoken"})
-    if token_input:
-        logintoken = token_input["value"]
-    else:
-        print("Failed to get login token")
-        exit()
-
-    # Define login payload
-    payload = {
-        "username": username,
-        "password": password,
-        "logintoken": logintoken
-    }
-
-    # Perform login
-    response = session.post(LOGIN_POST, data=payload)
-
-    # Check if login was successful
-    if "Logout" in response.text or "Abmelden" in response.text:
-        print("Login successful!")
-        return session
-    else:
-        print("Login failed!")
-        return None
 
 
 def get_all_list_my_courses_selenium():
@@ -242,8 +200,8 @@ def get_video_links(session, course_id):
     return video_links
 
 
-def download_videos(session, video_page_links, name_course_folder=""):
-    """Visits each resource page, finds the actual video, and downloads it."""
+def download_videos_debug(session, video_page_links, name_course_folder=""):
+    """Visits each resource page, finds and downloads videos (direct & Vimeo)."""
 
     # Create course-specific folder
     COURSE_FOLDER = os.path.join(DOWNLOAD_FOLDER, name_course_folder)
@@ -253,15 +211,61 @@ def download_videos(session, video_page_links, name_course_folder=""):
         resp = session.get(video_page)
         soup = BeautifulSoup(resp.text, "html.parser")
 
-        # Find the actual video download link
         video_link = None
+        vimeo_links = []
+
+        print(f"\nInspecting {video_page} for video links...")
+
+        # Print all <a> tags to check for video files
         for link in soup.find_all("a", href=True):
+            print(f"Found <a> link: {link['href']}")
             if any(ext in link["href"] for ext in [".mp4", ".mov", ".avi", ".mkv", "pluginfile.php"]):
                 video_link = link["href"]
-                break
+                break  # Stop at first direct video
 
+        # Print all <iframe> tags to check for embedded videos
+        for iframe in soup.find_all("iframe", src=True):
+            print(f"Found <iframe>: {iframe['src']}")
+            if "vimeo.com" in iframe["src"]:
+                vimeo_links.append(iframe["src"].split("?")[0])  # Clean URL
+
+        # Print extracted video links
+        print(f"Direct Video Found: {video_link}" if video_link else "No direct videos found.")
+        print(f"Vimeo Videos Found: {vimeo_links}" if vimeo_links else "No Vimeo videos found.")
+
+        # Stop after checking the first resource page for debugging
+        break
+
+
+def download_videos(session, video_page_links, name_course_folder=""):
+    """Visits each resource page, finds and downloads videos (direct & Vimeo)."""
+
+    # Create course-specific folder
+    COURSE_FOLDER = os.path.join(DOWNLOAD_FOLDER, name_course_folder)
+    os.makedirs(COURSE_FOLDER, exist_ok=True)
+
+    for video_page in video_page_links:
+        resp = session.get(video_page)
+        soup = BeautifulSoup(resp.text, "html.parser")
+
+        video_link = None
+        vimeo_links = []
+
+        # Find direct video download links
+        for link in soup.find_all("a", href=True):
+            if any(ext in link["href"] for ext in [".mp4", ".mov", ".avi", ".mkv", "pluginfile.php"]):
+                if link["href"].endswith("pdf") or link["href"].endswith("txt"):
+                    continue
+                video_link = link["href"]
+                break  # Stop at first direct video
+
+        # Find embedded Vimeo videos
+        for iframe in soup.find_all("iframe", src=True):
+            if "vimeo.com" in iframe["src"]:
+                vimeo_links.append(iframe["src"].split("?")[0])  # Clean URL
+
+        # Download direct videos
         if video_link:
-            # Get filename and download the video
             filename = video_link.split("/")[-1].split("?")[0]  # Extract file name
             filename = prepare_file_name(filename)
             video_path = os.path.join(COURSE_FOLDER, filename)
@@ -273,8 +277,106 @@ def download_videos(session, video_page_links, name_course_folder=""):
                     f.write(chunk)
 
             print(f"Saved: {video_path}")
-        else:
+
+        # Download Vimeo videos using yt-dlp
+        for vimeo_link in vimeo_links:
+            print(f"Downloading Vimeo video: {vimeo_link}")
+
+            ydl_opts = {
+                "outtmpl": os.path.join(COURSE_FOLDER, "%(title)s.%(ext)s"),
+                "format": "best",  # Best available quality
+            }
+
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([vimeo_link])
+
+        # If no video found
+        if not video_link and not vimeo_links:
             print(f"No downloadable video found on {video_page}")
+
+
+def download_videos_selenium(course_id, name_course_folder=""):
+    """Uses Selenium to find and download videos (direct & Vimeo)."""
+
+    COURSE_FOLDER = os.path.join(DOWNLOAD_FOLDER, name_course_folder)
+    os.makedirs(COURSE_FOLDER, exist_ok=True)
+
+    COURSE_URL = f"https://lms.itcareerhub.de/course/view.php?id={course_id}"
+
+    # Set up Selenium WebDriver
+    options = Options()
+    options.add_argument("--headless")  # Run without opening a browser
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    driver.get(COURSE_URL)
+
+    # Wait for the page to fully load
+    driver.implicitly_wait(5)
+
+    # **1. Scroll down the page to load hidden content**
+    scroll_pause_time = 2
+    last_height = driver.execute_script("return document.body.scrollHeight")
+
+    for _ in range(5):  # Scroll multiple times
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(scroll_pause_time)
+        new_height = driver.execute_script("return document.body.scrollHeight")
+        if new_height == last_height:  # Stop if no new content loads
+            break
+        last_height = new_height
+
+    # **2. Try clicking expandable sections**
+    try:
+        expand_buttons = driver.find_elements(By.CLASS_NAME, "expand-section-class")  # Adjust the class if needed
+        for button in expand_buttons:
+            driver.execute_script("arguments[0].click();", button)
+            time.sleep(2)  # Wait for content to load
+    except:
+        print("No expandable sections found.")
+
+    # **3. Extract all video-related elements**
+    video_links = [a.get_attribute("href") for a in driver.find_elements(By.TAG_NAME, "a") if a.get_attribute("href")]
+    iframe_links = [iframe.get_attribute("src") for iframe in driver.find_elements(By.TAG_NAME, "iframe") if
+                    iframe.get_attribute("src")]
+
+    driver.quit()
+
+    # Filter direct video links
+    direct_videos = [link for link in video_links if
+                     any(ext in link for ext in [".mp4", ".mov", ".avi", ".mkv", "pluginfile.php"])]
+
+    # Filter Vimeo videos
+    vimeo_videos = [link.split("?")[0] for link in iframe_links if "vimeo.com" in link]
+
+    print(f"\nDirect Video Links: {direct_videos}")
+    print(f"Vimeo Videos: {vimeo_videos}")
+
+    # **Download direct videos**
+    for video_link in direct_videos:
+        filename = video_link.split("/")[-1].split("?")[0]  # Extract file name
+        video_path = os.path.join(COURSE_FOLDER, filename)
+
+        print(f"Downloading direct video: {filename}")
+        video_resp = requests.get(video_link, stream=True)
+        with open(video_path, "wb") as f:
+            for chunk in video_resp.iter_content(chunk_size=1024):
+                f.write(chunk)
+
+        print(f"Saved: {video_path}")
+
+    # **Download Vimeo videos using yt-dlp**
+    for vimeo_link in vimeo_videos:
+        print(f"Downloading Vimeo video: {vimeo_link}")
+
+        ydl_opts = {
+            "outtmpl": os.path.join(COURSE_FOLDER, "%(title)s.%(ext)s"),
+            "format": "best",
+        }
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([vimeo_link])
 
 
 def prepare_name_of_folder_course(course_name):
@@ -291,6 +393,7 @@ def prepare_name_of_folder_course(course_name):
 
     # Run the script
 
+
 def save_course_page(session, course_id):
     """Fetches and saves the HTML of a course page for analysis."""
     course_url = f"https://lms.itcareerhub.de/course/view.php?id={course_id}"
@@ -303,30 +406,40 @@ def save_course_page(session, course_id):
 
     print(f"Saved {filename} - Open this file and check how videos are embedded.")
 
-# Run the function for course 135
-if __name__ == "__main__":
-    my_session, my_courses = get_all_list_my_courses_selenium()
-    save_course_page(my_session, 135)
 
-# if __name__ == "__main__":
-#     # Login to LMS and get course list
-#     my_session, my_courses = get_all_list_my_courses_selenium()
-#
-#     # Loop through courses and download PDFs and videos
-#     for course_id, course_name in my_courses.items():
-#         # PDF files
-#         print(f"\nProcessing course: {course_name} ({course_id})")
-#         pdf_page_links = get_pdf_links(my_session, course_id)
-#         if pdf_page_links:
-#             folder_course_name = prepare_name_of_folder_course(course_name)
-#             download_pdfs(my_session, pdf_page_links, folder_course_name)
-#         else:
-#             print("No PDF resources found in this course.")
-#         # Video files
-#         print(f"\nProcessing course for videos: {course_name} ({course_id})")
-#         video_page_links = get_video_links(my_session, course_id)
-#         if video_page_links:
-#             folder_course_name = prepare_name_of_folder_course(course_name)
-#             download_videos(my_session, video_page_links, folder_course_name)
-#         else:
-#             print("No video resources found in this course.")
+if __name__ == "__main__":
+    answer = "1"
+    while answer != "9":
+        print("Select a type: \n1. PDFs \n2. Videos \n3. Both \n9. Exit")
+        answer = input("Select a type: ")
+
+        if answer == "9":
+            break
+
+        # Login to LMS and get course list
+        my_session, my_courses = get_all_list_my_courses_selenium()
+
+        # Loop through courses and download PDFs and videos
+        for course_id, course_name in my_courses.items():
+            if answer == "1" or answer == "3":
+                # PDF files
+                print(f"\nProcessing course: {course_name} ({course_id})")
+                pdf_page_links = get_pdf_links(my_session, course_id)
+                if pdf_page_links:
+                    folder_course_name = prepare_name_of_folder_course(course_name)
+                    download_pdfs(my_session, pdf_page_links, folder_course_name)
+                else:
+                    print("No PDF resources found in this course.")
+
+            if answer == "2" or answer == "3":
+                # Video files
+                print(f"\nProcessing course for videos: {course_name} ({course_id})")
+                folder_course_name = prepare_name_of_folder_course(course_name)
+                download_videos_selenium(course_id, folder_course_name)
+                # video_page_links = get_video_links(my_session, course_id)
+                # if video_page_links:
+                #     folder_course_name = prepare_name_of_folder_course(course_name)
+                #     download_videos(my_session, video_page_links, folder_course_name)
+                #
+                # else:
+                #     print("No video resources found in this course.")
