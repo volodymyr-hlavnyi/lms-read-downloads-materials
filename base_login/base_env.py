@@ -20,7 +20,7 @@ def get_download_folder():
     return DOWNLOAD_FOLDER
 
 
-def login2_to_lms():
+def login2_to_lms(username, password):
     # Define URLs
     LOGIN_PAGE = "https://lms.itcareerhub.de/login/index.php"
     LOGIN_POST = "https://lms.itcareerhub.de/login/index.php"

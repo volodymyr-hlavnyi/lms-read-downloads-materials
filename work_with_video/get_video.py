@@ -8,10 +8,13 @@ from selenium.webdriver.chrome.options import Options
 import yt_dlp
 import os
 
+from base_login import get_download_folder
+
 
 def download_videos_selenium(course_id, name_course_folder=""):
     """Uses Selenium to find and download videos (direct & Vimeo)."""
 
+    DOWNLOAD_FOLDER = get_download_folder()
     COURSE_FOLDER = os.path.join(DOWNLOAD_FOLDER, name_course_folder)
     os.makedirs(COURSE_FOLDER, exist_ok=True)
 
@@ -71,15 +74,3 @@ def download_videos_selenium(course_id, name_course_folder=""):
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([vimeo_link])
 
-if __name__ == "__main__":
-    load_dotenv()
-    username = os.getenv("LMS_USER_NAME")
-    password = os.getenv("LMS_PASSWORD")
-
-    # Create a folder to store PDFs
-    DOWNLOAD_FOLDER = "pdf_downloads"
-    os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
-
-    COURSE_ID = 135
-
-    download_videos_selenium(COURSE_ID, COURSE_NAME)
