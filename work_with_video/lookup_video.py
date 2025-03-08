@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 
 # Load the saved HTML file
-with open("course_135.html", "r", encoding="utf-8") as f:
+with open("../course_135.html", "r", encoding="utf-8") as f:
     html_content = f.read()
 
 soup = BeautifulSoup(html_content, "html.parser")
