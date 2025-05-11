@@ -1,6 +1,6 @@
 from base_login import get_all_list_my_courses_selenium
 from work_with_pdf.get_pdf import processing_pdf
-from work_with_video.get_video import processing_video
+# from work_with_video.get_video import processing_video
 
 if __name__ == "__main__":
     answer = "1"
@@ -22,4 +22,5 @@ if __name__ == "__main__":
 
             if answer == "2" or answer == "3":
                 # Video files
-                processing_video(my_session, course_id, course_name)
+                print("Now, it not implemented...")
+                # processing_video(my_session, course_id)
