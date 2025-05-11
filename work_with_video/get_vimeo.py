@@ -52,7 +52,7 @@ for idx, link in enumerate(VIMEO_LINKS, start=1):
     try:
         title = driver.title or f"video_{idx}"
         print(f"Video Title: {title}")
-    except:
+    except Exception:
         title = f"video_{idx}"
 
     # ✅ Locate and play the video
@@ -75,7 +75,7 @@ for idx, link in enumerate(VIMEO_LINKS, start=1):
         duration = driver.execute_script("return arguments[0].duration;", video_element)
         duration = int(duration) if duration else 900
         print(f"🎥 Video Duration: {duration} seconds")
-    except:
+    except Exception:
         duration = 900
         print("Could not retrieve duration, using default 900 seconds")
 
