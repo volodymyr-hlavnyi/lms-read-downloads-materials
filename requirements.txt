@@ -10,3 +10,10 @@ aiodns==3.2.0
 chardet==5.2.0
 pycares==4.5.0
 urllib3==2.3.0
+# [code_style]-[BEGIN]
+ruff==0.11.5
+
+# Pre-commit hook.
+pre-commit==4.2.0
+
+# [code_style]-[END]
