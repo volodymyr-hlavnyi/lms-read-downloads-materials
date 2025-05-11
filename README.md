@@ -3,7 +3,7 @@
 ## Badges
 
 ![License](https://img.shields.io/github/license/volodymyr-hlavnyi/lms-read-downloads-materials)
-![Python Version](https://img.shields.io/badge/python-3.6%2B-blue)
+![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Dependencies](https://img.shields.io/librariesio/github/volodymyr-hlavnyi/lms-read-downloads-materials)
 
 ## Attention
@@ -28,7 +28,7 @@ The project uses third-party libraries, and their respective licenses are listed
 
 ## Requirements
 
-- Python 3.6 or higher
+- Python 3.10 or higher
 - Pipenv or virtual environment
 - Google Chrome browser
 - ChromeDriver (compatible with your Chrome version)
