@@ -5,6 +5,18 @@ from bs4 import BeautifulSoup
 from base_login import get_download_folder
 
 
+def processing_pdf(my_session, course_id, course_name):
+    from work_with_pdf import prepare_name_of_folder_course
+
+    print(f"\nProcessing course: {course_name} ({course_id})")
+    pdf_page_links = get_pdf_links(my_session, course_id)
+    if pdf_page_links:
+        folder_course_name = prepare_name_of_folder_course(course_name)
+        download_pdfs(my_session, pdf_page_links, folder_course_name)
+    else:
+        print("No PDF resources found in this course.")
+
+
 def get_all_pdf_links(session, courses):
     for course_id, course_name in courses.items():
         course_url = f"https://lms.itcareerhub.de/course/view.php?id={course_id}"

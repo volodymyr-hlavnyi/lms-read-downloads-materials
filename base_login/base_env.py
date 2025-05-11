@@ -4,9 +4,9 @@ import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
+load_dotenv()
 
 def get_credentials():
-    load_dotenv()
     username = os.getenv("LMS_USER_NAME")
     password = os.getenv("LMS_PASSWORD")
 
@@ -15,7 +15,10 @@ def get_credentials():
 
 def get_download_folder():
     # Create a folder to store PDFs
-    DOWNLOAD_FOLDER = "pdf_downloads"
+    DOWNLOAD_FOLDER = os.getenv("DOWNLOAD_FOLDER")
+    if not DOWNLOAD_FOLDER:
+        #set by default
+        DOWNLOAD_FOLDER = "LMS_materials_downloads"
     os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
     return DOWNLOAD_FOLDER
 

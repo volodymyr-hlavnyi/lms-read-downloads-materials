@@ -1,5 +1,27 @@
 # Project for Downloading Materials from the LMS of IT Hub
 
+## Badges
+
+![License](https://img.shields.io/github/license/volodymyr-hlavnyi/lms-read-downloads-materials)
+![Build Status](https://github.com/volodymyr-hlavnyi/lms-read-downloads-materials/actions/workflows/main.yml/badge.svg)
+![Python Version](https://img.shields.io/badge/python-3.6%2B-blue)
+![Dependencies](https://img.shields.io/librariesio/github/volodymyr-hlavnyi/lms-read-downloads-materials)
+![Code Quality](https://img.shields.io/codeclimate/maintainability/volodymyr-hlavnyi/lms-read-downloads-materials)
+
+## Attention
+
+This project is provided as an example for demonstrating how to work with authentication and save materials for students who are studying or have studied at IT Hub. 
+
+**Note:** You can only use this project if you have access to the IT Hub LMS.
+
+## Licenses
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+### Third-Party Licenses
+
+The project uses third-party libraries, and their respective licenses are listed in the [THIRD_PARTY_LICENSES.txt](THIRD_PARTY_LICENSES.txt) file.
+
 ## Table of Contents
 
 1. [Requirements](#requirements)
