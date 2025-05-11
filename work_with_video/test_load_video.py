@@ -1,5 +1,4 @@
 from app import processing_video
-from base_login import get_all_list_my_courses_selenium
 
 if __name__ == "__main__":
     # Login to LMS and get course list

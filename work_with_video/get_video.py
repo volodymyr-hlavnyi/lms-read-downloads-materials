@@ -3,21 +3,14 @@ import time
 import subprocess
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
 from base_login import get_download_folder, get_credentials, login2_to_lms
 from work_with_pdf import prepare_name_of_folder_course, prepare_file_name
 from selenium.webdriver.firefox.service import Service as FirefoxService
-from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from webdriver_manager.firefox import GeckoDriverManager
 
-from selenium import webdriver
-from selenium.webdriver.firefox.service import Service as FirefoxService
-from selenium.webdriver.firefox.options import Options
-from webdriver_manager.firefox import GeckoDriverManager
+# from selenium.webdriver.firefox.options import Options
 
 from work_with_video.get_vimeo import video_file
 
@@ -73,7 +66,7 @@ def download_videos_selenium(course_id, name_course_folder=""):
     # for section in sections:
     #     print(section.get_attribute("outerHTML"))
 
-    wait = WebDriverWait(driver, 5)  # Wait up to 10 seconds
+    WebDriverWait(driver, 5)  # Wait up to 10 seconds
     sections = driver.find_elements(By.XPATH, "//li[contains(@id, 'section-')]")
 
     for section in sections:
@@ -82,14 +75,14 @@ def download_videos_selenium(course_id, name_course_folder=""):
             session_name = title_element.text.strip()
             session_name = prepare_file_name(session_name)
             print(f"Processing: {session_name}")
-        except:
+        except Exception:
             continue
 
         try:
             play_button = section.find_element(By.CSS_SELECTOR, "a[aria-label^='Занятие']")
             play_button.click()
             time.sleep(3)
-        except:
+        except Exception:
             print("Play button not found, trying JavaScript...")
             driver.execute_script("document.querySelector('video').play();")
 
