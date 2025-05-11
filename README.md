@@ -40,6 +40,8 @@ Create a `.env` file in the root directory of the project and add the following 
 ```ini
 LMS_USER_NAME="your_username"
 LMS_PASSWORD="your_password"
+
+DOWNLOAD_FOLDER="LMS_materials_downloads"
 ```
 
 Replace `your_username` and `your_password` with your actual LMS credentials.
@@ -56,12 +58,6 @@ Then, execute the following command to start the script:
 
 ```bash
 python app.py
-```
-
-If you're using `pipenv`, activate the environment and run:
-
-```bash
-pcphange source venv/bin/activateython app.py
 ```
 
 ## Notes

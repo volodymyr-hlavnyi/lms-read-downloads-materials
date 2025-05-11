@@ -22,5 +22,5 @@ if __name__ == "__main__":
 
             if answer == "2" or answer == "3":
                 # Video files
-                print("Now, it not implemented...")
+                print("Now, it not implemented... Sorry...")
                 # processing_video(my_session, course_id)
