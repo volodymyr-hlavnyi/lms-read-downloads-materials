@@ -5,6 +5,13 @@
 ![License](https://img.shields.io/github/license/volodymyr-hlavnyi/lms-read-downloads-materials)
 ![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Dependencies](https://img.shields.io/librariesio/github/volodymyr-hlavnyi/lms-read-downloads-materials)
+![Repo size](https://img.shields.io/github/repo-size/username/repo)
+![LOC](https://img.shields.io/tokei/lines/github/username/repo)
+![Last commit](https://img.shields.io/github/last-commit/username/repo)
+![Contributors](https://img.shields.io/github/contributors/username/repo)
+![Commits/month](https://img.shields.io/github/commit-activity/m/username/repo)
+![Release](https://img.shields.io/github/v/release/username/repo)
+
 
 ## Attention
 
