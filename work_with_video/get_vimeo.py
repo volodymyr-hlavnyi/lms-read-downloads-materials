@@ -51,7 +51,7 @@ for idx, link in enumerate(VIMEO_LINKS, start=1):
     # ✅ Extract video title
     try:
         title = driver.title or f"video_{idx}"
-        print(f"📌 Video Title: {title}")
+        print(f"Video Title: {title}")
     except:
         title = f"video_{idx}"
 
@@ -61,14 +61,14 @@ for idx, link in enumerate(VIMEO_LINKS, start=1):
         driver.execute_script("arguments[0].play();", video_element)
         print("✅ Video started!")
     except Exception as e:
-        print("❌ Could not start video:", e)
+        print("Could not start video:", e)
 
     # ✅ Enable Fullscreen
     try:
         driver.execute_script("arguments[0].requestFullscreen();", video_element)
         print("✅ Fullscreen mode enabled!")
     except Exception as e:
-        print("⚠️ Fullscreen error:", e)
+        print("Fullscreen error:", e)
 
     # ✅ Get video duration
     try:
@@ -77,7 +77,7 @@ for idx, link in enumerate(VIMEO_LINKS, start=1):
         print(f"🎥 Video Duration: {duration} seconds")
     except:
         duration = 900
-        print("⚠️ Could not retrieve duration, using default 900 seconds")
+        print("Could not retrieve duration, using default 900 seconds")
 
     # ✅ Start Recording
     video_file = f"{title}.mp4".replace(" ", "_")
