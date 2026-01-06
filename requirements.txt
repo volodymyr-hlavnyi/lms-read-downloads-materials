@@ -6,7 +6,7 @@ webdriver-manager==4.0.2
 yt-dlp==2025.2.19
 websockets==15.0.1
 brotli==1.1.0
-aiodns==2.6.0
+aiodns==3.2.0
 chardet==5.2.0
 pycares==4.5.0
 urllib3==2.3.0
